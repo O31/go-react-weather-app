@@ -14,7 +14,7 @@ function Weather() {
 
   // Load recent searches from localStorage on component mount
   useEffect(() => {
-    const saved = localStorage.getItem("recentWeatherSearches")
+    const saved = localStorage.getItem("TTWeather_app")
     if (saved) {
       setRecentSearches(JSON.parse(saved))
     }
@@ -28,12 +28,6 @@ function Weather() {
     }
   }, [error])
 
-  const addToRecentSearches = (cityName) => {
-    const newRecent = [cityName, ...recentSearches.filter((c) => c !== cityName)].slice(0, 5)
-    setRecentSearches(newRecent)
-    localStorage.setItem("recentWeatherSearches", JSON.stringify(newRecent))
-  }
-
   const fetchWeather = async (query) => {
     setError("")
     try {
@@ -41,7 +35,6 @@ function Weather() {
       if (!res.ok) throw new Error("City not found or API error")
       const data = await res.json()
       setWeather(data)
-      addToRecentSearches(data.city)
       setSelectedLocation({ lat: data.latitude, lng: data.longitude })
       setCity(data.city)
     } catch (err) {
@@ -58,8 +51,24 @@ function Weather() {
     fetchWeather(locationQuery)
   }
 
-  // Fetch weather for default city on initial load
+  // Add function to fetch recent searches from backend
+  const fetchRecentSearches = async () => {
+    try {
+      const res = await fetch(`${WEATHER_API_URL}/recent`, {
+        credentials: "include",
+      })
+      if (res.ok) {
+        const searches = await res.json()
+        setRecentSearches(searches || [])
+      }
+    } catch (err) {
+      console.log("Could not fetch recent searches:", err)
+    }
+  }
+
+  // Update useEffect to fetch recent searches on mount
   useEffect(() => {
+    fetchRecentSearches()
     fetchWeather(city)
   }, [])
 

@@ -238,3 +238,12 @@
     font-size: 1rem;
   }
 }
+
+.leaflet-container {
+  height: 300px;
+  min-height: 300px;
+  width: 100%;
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  z-index: 1;
+}

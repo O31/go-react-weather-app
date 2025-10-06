@@ -34,15 +34,16 @@ function Weather() {
     localStorage.setItem("recentWeatherSearches", JSON.stringify(newRecent))
   }
 
-  const fetchWeather = async (cityName) => {
-    setLoading(true)
+  const fetchWeather = async (query) => {
     setError("")
     try {
-      const res = await fetch(`${WEATHER_API_URL}/${encodeURIComponent(cityName)}`)
+      const res = await fetch(`${WEATHER_API_URL}/${query}`)
       if (!res.ok) throw new Error("City not found or API error")
       const data = await res.json()
       setWeather(data)
-      addToRecentSearches(cityName)
+      addToRecentSearches(data.city)
+      setSelectedLocation({ lat: data.latitude, lng: data.longitude })
+      setCity(data.city)
     } catch (err) {
       setError(err.message)
       setWeather(null)
@@ -53,63 +54,19 @@ function Weather() {
 
   // Handle map location selection
   const handleLocationSelect = async (lat, lng) => {
-    setSelectedLocation({ lat, lng })
-    setLoading(true)
-    setError("")
-
-    try {
-      // Use coordinates for weather query
-      const locationQuery = `${lat.toFixed(4)},${lng.toFixed(4)}`
-      const url = `${WEATHER_API_URL}/${locationQuery}`
-      console.log("Fetching weather for coordinates:", locationQuery, url) // Debug log
-
-      const res = await fetch(url)
-      if (!res.ok) throw new Error("Weather data not available for this location")
-      const data = await res.json()
-      setWeather(data)
-      setCity(data.city || locationQuery)
-      addToRecentSearches(data.city || locationQuery)
-    } catch (err) {
-      setError(err.message)
-      setWeather(null)
-    } finally {
-      setLoading(false)
-    }
+    const locationQuery = `${lat.toFixed(4)},${lng.toFixed(4)}`
+    fetchWeather(locationQuery)
   }
 
-  // Initial fetch
+  // Fetch weather for default city on initial load
   useEffect(() => {
     fetchWeather(city)
-    // eslint-disable-next-line
   }, [])
 
   const handleSearch = async (e) => {
     e.preventDefault()
     if (!city.trim()) return
-    setLoading(true)
-    setError("")
-    try {
-      const res = await fetch(`${WEATHER_API_URL}/${encodeURIComponent(city.trim())}`)
-      if (!res.ok) throw new Error("City not found or API error")
-      const data = await res.json()
-      setWeather(data)
-      // Update map marker with coordinates from backend
-      setSelectedLocation({
-        lat: data.latitude,
-        lng: data.longitude,
-      })
-      addToRecentSearches(city.trim())
-    } catch (err) {
-      setError(err.message)
-      setWeather(null)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleRecentCityClick = (recentCity) => {
-    setCity(recentCity)
-    fetchWeather(recentCity)
+    fetchWeather(city.trim())
   }
 
   return (
@@ -132,11 +89,7 @@ function Weather() {
         {recentSearches.length > 0 && (
           <div className="recent-searches">
             {recentSearches.map((recentCity, index) => (
-              <span
-                key={index}
-                className="recent-city"
-                onClick={() => handleRecentCityClick(recentCity)}
-              >
+              <span key={index} className="recent-city" onClick={() => fetchWeather(recentCity)}>
                 {recentCity}
               </span>
             ))}
@@ -144,41 +97,36 @@ function Weather() {
         )}
       </div>
 
-      {loading && (
-        <div className="loading">
-          <div className="spinner"></div>
-          Loading weather...
-        </div>
-      )}
-
       {error && <div className="error">{error}</div>}
 
-      {weather && !loading && (
-        <div className="weather-content">
-          <div className="weather-icon">
-            <img
-              src={weather.icon.startsWith("http") ? weather.icon : `https:${weather.icon}`}
-              alt="weather icon"
-            />
-          </div>
-          <div className="weather-info">
-            <h3>{weather.city}</h3>
-            <div className="temperature">{weather.temperature}°C</div>
-            <div className="description">{weather.description}</div>
-            <div className="weather-details">
-              <div>Feels like: {weather.feels_like}°C</div>
-              <div>Humidity: {weather.humidity}%</div>
-              <div>
-                Wind: {weather.wind_speed} km/h {weather.wind_direction}
+      {weather && (
+        <>
+          <div className="weather-content">
+            <div className="weather-icon">
+              <img
+                src={weather.icon.startsWith("http") ? weather.icon : `https:${weather.icon}`}
+                alt="weather icon"
+              />
+            </div>
+            <div className="weather-info">
+              <h3>{weather.city}</h3>
+              <div className="temperature">{weather.temperature}°C</div>
+              <div className="description">{weather.description}</div>
+              <div className="weather-details">
+                <div>Feels like: {weather.feels_like}°C</div>
+                <div>Humidity: {weather.humidity}%</div>
+                <div>
+                  Wind: {weather.wind_speed} km/h {weather.wind_direction}
+                </div>
+                <div>Pressure: {weather.pressure} mb</div>
+                <div>Visibility: {weather.visibility} km</div>
+                <div>Local Time: {weather.local_time}</div>
               </div>
-              <div>Pressure: {weather.pressure} mb</div>
-              <div>Visibility: {weather.visibility} km</div>
-              <div>Local Time: {weather.local_time}</div>
             </div>
           </div>
-        </div>
+          <WeatherMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
+        </>
       )}
-      <WeatherMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
     </div>
   )
 }

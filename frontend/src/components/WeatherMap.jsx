@@ -1,7 +1,7 @@
-import React from "react"
-import { MapContainer, TileLayer, useMapEvents, Marker, Popup } from "react-leaflet"
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import "./WeatherMap.css"
+import { useEffect } from "react"
 
 // Fix for default markers in react-leaflet
 import L from "leaflet"
@@ -16,6 +16,16 @@ let DefaultIcon = L.divIcon({
 })
 
 L.Marker.prototype.options.icon = DefaultIcon
+
+function CenterMapView({ coords }) {
+  const map = useMap()
+  useEffect(() => {
+    if (coords) {
+      map.setView([coords.lat, coords.lng], map.getZoom(), { animate: true })
+    }
+  }, [coords, map])
+  return null
+}
 
 function LocationMarker({ onLocationSelect, selectedLocation }) {
   useMapEvents({
@@ -39,14 +49,19 @@ function WeatherMap({ onLocationSelect, selectedLocation }) {
     <div className="map-container">
       <h4>Click on the map to get weather for that location</h4>
       <MapContainer
-        center={[59.3293, 18.0686]} // Stockholm coordinates
+        center={[selectedLocation.lat, selectedLocation.lng]}
         zoom={6}
         className="leaflet-container"
+        scrollWheelZoom={true}
+        style={{ height: "300px", minHeight: "300px", width: "100%" }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {/* Center the map when selectedLocation changes */}
+        <CenterMapView coords={selectedLocation} />
+
         <LocationMarker onLocationSelect={onLocationSelect} selectedLocation={selectedLocation} />
       </MapContainer>
     </div>

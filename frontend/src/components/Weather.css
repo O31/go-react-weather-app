@@ -238,18 +238,3 @@
     font-size: 1rem;
   }
 }
-
-.map-toggle-btn {
-  background: #17a2b8;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-size: 0.9rem;
-}
-
-.map-toggle-btn:hover {
-  background: #138496;
-}

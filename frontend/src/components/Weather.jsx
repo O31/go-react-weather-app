@@ -10,8 +10,7 @@ function Weather() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [recentSearches, setRecentSearches] = useState([])
-  const [selectedLocation, setSelectedLocation] = useState(null)
-  const [showMap, setShowMap] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState({ lat: 59.3293, lng: 18.0686 }) // Stockholm default
 
   // Load recent searches from localStorage on component mount
   useEffect(() => {
@@ -35,29 +34,6 @@ function Weather() {
     localStorage.setItem("recentWeatherSearches", JSON.stringify(newRecent))
   }
 
-  const handleLocationSelect = async (lat, lng) => {
-    setSelectedLocation({ lat, lng })
-    setLoading(true)
-    setError("")
-
-    try {
-      // Use reverse geocoding or coordinates directly
-      // For now, we'll use lat,lng format that some weather APIs support
-      const locationQuery = `${lat.toFixed(4)},${lng.toFixed(4)}`
-      const res = await fetch(`${WEATHER_API_URL}/${encodeURIComponent(locationQuery)}`)
-      if (!res.ok) throw new Error("Weather data not available for this location")
-      const data = await res.json()
-      setWeather(data)
-      setCity(data.city || locationQuery)
-      addToRecentSearches(data.city || locationQuery)
-    } catch (err) {
-      setError(err.message)
-      setWeather(null)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const fetchWeather = async (cityName) => {
     setLoading(true)
     setError("")
@@ -67,6 +43,29 @@ function Weather() {
       const data = await res.json()
       setWeather(data)
       addToRecentSearches(cityName)
+    } catch (err) {
+      setError(err.message)
+      setWeather(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle map location selection
+  const handleLocationSelect = async (lat, lng) => {
+    setSelectedLocation({ lat, lng })
+    setLoading(true)
+    setError("")
+
+    try {
+      // Use coordinates for weather query
+      const locationQuery = `${lat.toFixed(4)},${lng.toFixed(4)}`
+      const res = await fetch(`${WEATHER_API_URL}/${encodeURIComponent(locationQuery)}`)
+      if (!res.ok) throw new Error("Weather data not available for this location")
+      const data = await res.json()
+      setWeather(data)
+      setCity(data.city || locationQuery)
+      addToRecentSearches(data.city || locationQuery)
     } catch (err) {
       setError(err.message)
       setWeather(null)
@@ -110,12 +109,6 @@ function Weather() {
           </button>
         </form>
 
-        <div style={{ textAlign: "center", margin: "1rem 0" }}>
-          <button className="map-toggle-btn" onClick={() => setShowMap(!showMap)} type="button">
-            {showMap ? "Hide Map" : "Show Map"}
-          </button>
-        </div>
-
         {recentSearches.length > 0 && (
           <div className="recent-searches">
             {recentSearches.map((recentCity, index) => (
@@ -131,11 +124,43 @@ function Weather() {
         )}
       </div>
 
-      {showMap && (
-        <WeatherMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
+      {/* Map is always visible now */}
+      <WeatherMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
+
+      {loading && (
+        <div className="loading">
+          <div className="spinner"></div>
+          Loading weather...
+        </div>
       )}
 
-      {/* ... (keep all your existing weather display JSX) */}
+      {error && <div className="error">{error}</div>}
+
+      {weather && !loading && (
+        <div className="weather-content">
+          <div className="weather-icon">
+            <img
+              src={weather.icon.startsWith("http") ? weather.icon : `https:${weather.icon}`}
+              alt="weather icon"
+            />
+          </div>
+          <div className="weather-info">
+            <h3>{weather.city}</h3>
+            <div className="temperature">{weather.temperature}°C</div>
+            <div className="description">{weather.description}</div>
+            <div className="weather-details">
+              <div>Feels like: {weather.feels_like}°C</div>
+              <div>Humidity: {weather.humidity}%</div>
+              <div>
+                Wind: {weather.wind_speed} km/h {weather.wind_direction}
+              </div>
+              <div>Pressure: {weather.pressure} mb</div>
+              <div>Visibility: {weather.visibility} km</div>
+              <div>Local Time: {weather.local_time}</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -96,6 +96,8 @@ func GetWeatherByCity(city string) models.Weather {
 	}
 	return models.Weather{
 		City:        apiResp.Location.Name,
+		Latitude:    apiResp.Location.Lat,
+		Longitude:   apiResp.Location.Lon,
 		Temperature: apiResp.Current.TempC,
 		FeelsLike:   apiResp.Current.Feelslike,
 		Description: apiResp.Current.Condition.Text,

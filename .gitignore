@@ -1,7 +1,5 @@
 # Environment files
-.env
-*.env
-
+backend/.env
 # Dependencies
 node_modules/
 vendor/

@@ -83,10 +83,27 @@ function Weather() {
     // eslint-disable-next-line
   }, [])
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault()
-    if (city.trim()) {
-      fetchWeather(city.trim())
+    if (!city.trim()) return
+    setLoading(true)
+    setError("")
+    try {
+      const res = await fetch(`${WEATHER_API_URL}/${encodeURIComponent(city.trim())}`)
+      if (!res.ok) throw new Error("City not found or API error")
+      const data = await res.json()
+      setWeather(data)
+      // Update map marker with coordinates from backend
+      setSelectedLocation({
+        lat: data.latitude,
+        lng: data.longitude,
+      })
+      addToRecentSearches(city.trim())
+    } catch (err) {
+      setError(err.message)
+      setWeather(null)
+    } finally {
+      setLoading(false)
     }
   }
 

@@ -2,6 +2,8 @@ package models
 
 type Weather struct {
 	City        string  `json:"city"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
 	Temperature float64 `json:"temperature"`
 	FeelsLike   float64 `json:"feels_like"`
 	Description string  `json:"description"`
@@ -16,8 +18,10 @@ type Weather struct {
 
 type WeatherAPIResponse struct {
 	Location struct {
-		Name      string `json:"name"`
-		Localtime string `json:"localtime"`
+		Name      string  `json:"name"`
+		Lat       float64 `json:"lat"`
+		Lon       float64 `json:"lon"`
+		Localtime string  `json:"localtime"`
 	} `json:"location"`
 	Current struct {
 		TempC     float64 `json:"temp_c"`

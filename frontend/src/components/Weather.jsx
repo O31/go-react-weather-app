@@ -31,9 +31,13 @@ function Weather() {
   const fetchWeather = async (query) => {
     setError("")
     try {
-      const res = await fetch(`${WEATHER_API_URL}/${query}`)
+      const res = await fetch(`${WEATHER_API_URL}/${query}`, {
+        credentials: "include", // ✅ Essential!
+      })
+      console.log("Fetch response: ", `${WEATHER_API_URL}/${query}`)
       if (!res.ok) throw new Error("City not found or API error")
       const data = await res.json()
+      console.log("Fetched data: ", data)
       setWeather(data)
       setSelectedLocation({ lat: data.latitude, lng: data.longitude })
       setCity(data.city)
@@ -57,8 +61,10 @@ function Weather() {
       const res = await fetch(`${WEATHER_API_URL}/recent`, {
         credentials: "include",
       })
+      console.log("res res res:", res)
       if (res.ok) {
         const searches = await res.json()
+        console.log("Recent searches fetched:", searches)
         setRecentSearches(searches || [])
       }
     } catch (err) {
@@ -75,6 +81,7 @@ function Weather() {
   const handleSearch = async (e) => {
     e.preventDefault()
     if (!city.trim()) return
+    console.log("Searching for city:", city)
     fetchWeather(city.trim())
   }
 

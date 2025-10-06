@@ -31,8 +31,8 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	// Routes
-	r.Get("/weather/{city}", handlers.GetWeatherByCity)
 	r.Get("/weather/recent", handlers.RecentSearchesHandler)
+	r.Get("/weather/{city}", handlers.GetWeatherByCity)
 
 	log.Println("Server starting on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))

@@ -11,20 +11,6 @@ import (
 	"weather-backend/internal/models"
 )
 
-type openWeatherResponse struct {
-	Name string `json:"name"`
-	Main struct {
-		Temp     float64 `json:"temp"`
-		Humidity int     `json:"humidity"`
-	} `json:"main"`
-	Weather []struct {
-		Description string `json:"description"`
-	} `json:"weather"`
-	Wind struct {
-		Speed float64 `json:"speed"`
-	} `json:"wind"`
-}
-
 // Helper function to add a search term to recent searches cookie
 func AddRecentSearch(w http.ResponseWriter, r *http.Request, searchTerm string) {
 	var recent []string
@@ -48,6 +34,7 @@ func AddRecentSearch(w http.ResponseWriter, r *http.Request, searchTerm string) 
 			break
 		}
 	}
+	fmt.Println("\n\n\n\n\n", recent)
 
 	// Set the updated cookie
 	http.SetCookie(w, &http.Cookie{
@@ -58,6 +45,7 @@ func AddRecentSearch(w http.ResponseWriter, r *http.Request, searchTerm string) 
 		HttpOnly: false,             // Allow frontend to read if needed
 		SameSite: http.SameSiteLaxMode,
 	})
+	fmt.Println("Set cookie:", strings.Join(unique, "|"))
 }
 
 // Helper function to get recent searches from cookie
@@ -68,6 +56,7 @@ func GetRecentSearches(r *http.Request) []string {
 	}
 
 	searches := strings.Split(cookie.Value, "|")
+	fmt.Println("GetRecentSearches:", searches)
 	result := []string{}
 	for _, search := range searches {
 		if search != "" {
@@ -97,9 +86,11 @@ func SetLastLocation(w http.ResponseWriter, location string) {
 		SameSite: http.SameSiteLaxMode,
 	})
 }
+
 func GetWeatherByCity(city string) models.Weather {
 	apiKey := os.Getenv("OPENWEATHER_API_KEY")
 	safeCity := url.QueryEscape(city)
+
 	url := fmt.Sprintf(
 		"https://api.weatherapi.com/v1/current.json?key=%s&q=%s&aqi=no",
 		apiKey, safeCity,

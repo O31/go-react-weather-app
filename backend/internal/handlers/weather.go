@@ -6,16 +6,15 @@ import (
 
 	"weather-backend/internal/services"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 func GetWeatherByCity(w http.ResponseWriter, r *http.Request) {
-	city := chi.URLParam(r, "city") // Get the {city} from the route
+	city := chi.URLParam(r, "city")
 
 	if city == "" {
 		city = services.GetLastLocation(r)
 	}
-
 	weather := services.GetWeatherByCity(city)
 
 	services.SetLastLocation(w, weather.City)

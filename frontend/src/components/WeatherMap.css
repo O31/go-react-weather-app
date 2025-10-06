@@ -1,0 +1,42 @@
+.map-container {
+  margin: 1.5rem 0;
+}
+
+.map-container h4 {
+  margin: 0 0 0.5rem 0;
+  color: #636e72;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.leaflet-container {
+  height: 300px;
+  width: 100%;
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  z-index: 1;
+}
+
+.custom-marker {
+  font-size: 20px;
+  text-align: center;
+  line-height: 25px;
+}
+
+.custom-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .leaflet-container {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .leaflet-container {
+    height: 200px;
+  }
+}

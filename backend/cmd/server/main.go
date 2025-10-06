@@ -9,9 +9,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load()
 	r := chi.NewRouter()
 
 	// Add CORS middleware for frontend development
@@ -29,7 +31,6 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	// Routes
-	r.Get("/weather", handlers.GetWeather)
 	r.Get("/weather/{city}", handlers.GetWeatherByCity)
 
 	log.Println("Server starting on :8080")

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import WeatherMap from "./WeatherMap"
 import "./Weather.css"
 
-const WEATHER_API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/weather"
+const WEATHER_API_URL = "http://localhost:8080/weather"
 
 function Weather() {
   const [city, setCity] = useState("Stockholm")
@@ -60,7 +60,10 @@ function Weather() {
     try {
       // Use coordinates for weather query
       const locationQuery = `${lat.toFixed(4)},${lng.toFixed(4)}`
-      const res = await fetch(`${WEATHER_API_URL}/${encodeURIComponent(locationQuery)}`)
+      const url = `${WEATHER_API_URL}/${locationQuery}`
+      console.log("Fetching weather for coordinates:", locationQuery, url) // Debug log
+
+      const res = await fetch(url)
       if (!res.ok) throw new Error("Weather data not available for this location")
       const data = await res.json()
       setWeather(data)
@@ -124,9 +127,6 @@ function Weather() {
         )}
       </div>
 
-      {/* Map is always visible now */}
-      <WeatherMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
-
       {loading && (
         <div className="loading">
           <div className="spinner"></div>
@@ -161,6 +161,7 @@ function Weather() {
           </div>
         </div>
       )}
+      <WeatherMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
     </div>
   )
 }

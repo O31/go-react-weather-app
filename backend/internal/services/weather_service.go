@@ -74,6 +74,7 @@ func GetWeatherByCity(city string) models.Weather {
 		"https://api.weatherapi.com/v1/current.json?key=%s&q=%s&aqi=no",
 		apiKey, safeCity,
 	)
+
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != 200 {
 		body, _ := io.ReadAll(resp.Body)

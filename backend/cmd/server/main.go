@@ -31,6 +31,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	// Routes
+	r.Get("/weather/", handlers.GetWeatherByCity)
 	r.Get("/weather/recent", handlers.RecentSearchesHandler)
 	r.Get("/weather/{city}", handlers.GetWeatherByCity)
 

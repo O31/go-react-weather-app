@@ -30,6 +30,7 @@ function Weather() {
 
   const fetchWeather = async (query) => {
     setError("")
+    setLoading(true)
     try {
       const res = await fetch(`${WEATHER_API_URL}/${query}`, {
         credentials: "include", // ✅ Essential!
@@ -37,7 +38,12 @@ function Weather() {
       console.log("Fetch response: ", `${WEATHER_API_URL}/${query}`)
       if (!res.ok) throw new Error("City not found or API error")
       const data = await res.json()
-      console.log("Fetched data: ", data)
+      if (data.error !== undefined) {
+        setWeather(null)
+        throw new Error("Error fetching data from API")
+      }
+
+      fetchRecentSearches()
       setWeather(data)
       setSelectedLocation({ lat: data.latitude, lng: data.longitude })
       setCity(data.city)
@@ -75,7 +81,7 @@ function Weather() {
   // Update useEffect to fetch recent searches on mount
   useEffect(() => {
     fetchRecentSearches()
-    fetchWeather(city)
+    fetchWeather("")
   }, [])
 
   const handleSearch = async (e) => {
@@ -112,7 +118,6 @@ function Weather() {
           </div>
         )}
       </div>
-
       {error && <div className="error">{error}</div>}
 
       {weather && (
@@ -140,9 +145,9 @@ function Weather() {
               </div>
             </div>
           </div>
-          <WeatherMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
         </>
       )}
+      <WeatherMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
     </div>
   )
 }

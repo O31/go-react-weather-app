@@ -34,7 +34,6 @@ func AddRecentSearch(w http.ResponseWriter, r *http.Request, searchTerm string) 
 			break
 		}
 	}
-	fmt.Println("\n\n\n\n\n", recent)
 
 	// Set the updated cookie
 	http.SetCookie(w, &http.Cookie{
@@ -66,28 +65,7 @@ func GetRecentSearches(r *http.Request) []string {
 	return result
 }
 
-// Helper function to get last searched location from cookie
-func GetLastLocation(r *http.Request) string {
-	cookie, err := r.Cookie("lastLocation")
-	if err != nil {
-		return "Stockholm" // Default city
-	}
-	return cookie.Value
-}
-
-// Helper function to set last location cookie
-func SetLastLocation(w http.ResponseWriter, location string) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "lastLocation",
-		Value:    location,
-		Path:     "/",
-		MaxAge:   30 * 24 * 60 * 60, // 30 days
-		HttpOnly: false,
-		SameSite: http.SameSiteLaxMode,
-	})
-}
-
-func GetWeatherByCity(city string) models.Weather {
+func GetWeatherByCity(city string) (models.Weather, error) {
 	apiKey := os.Getenv("OPENWEATHER_API_KEY")
 	safeCity := url.QueryEscape(city)
 
@@ -100,21 +78,16 @@ func GetWeatherByCity(city string) models.Weather {
 	if err != nil || resp.StatusCode != 200 {
 		body, _ := io.ReadAll(resp.Body)
 		fmt.Printf("WeatherAPI error: status=%d, body=%s\n", resp.StatusCode, string(body))
-		return models.Weather{
-			City:        city,
-			Temperature: 0.0,
-			Description: "Error fetching data",
-			Humidity:    0,
-			WindSpeed:   0.0,
-		}
+		return models.Weather{}, fmt.Errorf("failed to fetch weather data for %s", city)
 	}
 	defer resp.Body.Close()
 
 	var apiResp models.WeatherAPIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
 		fmt.Println("JSON decode error:", err)
-		return models.Weather{City: city, Temperature: 0.0, Description: "Error parsing data"}
+		return models.Weather{}, fmt.Errorf("failed to parse weather data for %s", city)
 	}
+
 	return models.Weather{
 		City:        apiResp.Location.Name,
 		Latitude:    apiResp.Location.Lat,
@@ -129,5 +102,5 @@ func GetWeatherByCity(city string) models.Weather {
 		Visibility:  apiResp.Current.VisKm,
 		LocalTime:   apiResp.Location.Localtime,
 		Icon:        apiResp.Current.Condition.Icon,
-	}
+	}, nil
 }

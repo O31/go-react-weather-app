@@ -14,6 +14,7 @@ type Weather struct {
 	Visibility  float64 `json:"visibility"`
 	LocalTime   string  `json:"local_time"`
 	Icon        string  `json:"icon"`
+	Error       string  `json:"error,omitempty"`
 }
 
 type WeatherAPIResponse struct {

@@ -33,7 +33,7 @@ function Weather() {
     setLoading(true)
     try {
       const res = await fetch(`${WEATHER_API_URL}/${query}`, {
-        credentials: "include", // ✅ Essential!
+        credentials: "include",
       })
       console.log("Fetch response: ", `${WEATHER_API_URL}/${query}`)
       if (!res.ok) throw new Error("City not found or API error")

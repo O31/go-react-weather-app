@@ -44,7 +44,6 @@ func AddRecentSearch(w http.ResponseWriter, r *http.Request, searchTerm string) 
 		HttpOnly: false,             // Allow frontend to read if needed
 		SameSite: http.SameSiteLaxMode,
 	})
-	fmt.Println("Set cookie:", strings.Join(unique, "|"))
 }
 
 // Helper function to get recent searches from cookie
@@ -55,7 +54,7 @@ func GetRecentSearches(r *http.Request) []string {
 	}
 
 	searches := strings.Split(cookie.Value, "|")
-	fmt.Println("GetRecentSearches:", searches)
+
 	result := []string{}
 	for _, search := range searches {
 		if search != "" {

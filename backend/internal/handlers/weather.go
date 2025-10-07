@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"weather-backend/internal/models"
@@ -15,14 +14,12 @@ func GetWeatherByCity(w http.ResponseWriter, r *http.Request) {
 	city := chi.URLParam(r, "city")
 
 	if city == "" {
-		fmt.Println("City param empty, using recent search if available")
 		if len(services.GetRecentSearches(r)) != 0 {
 			city = services.GetRecentSearches(r)[0]
 		} else {
 			city = "Stockholm" // Default city
 		}
 	}
-	fmt.Println("GetWeatherByCity:", city)
 
 	weather, err := services.GetWeatherByCity(city)
 	if err != nil {

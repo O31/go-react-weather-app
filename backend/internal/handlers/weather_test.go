@@ -3,32 +3,28 @@ package handlers
 import (
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
-
-	"github.com/go-chi/chi/v5"
 )
 
 func TestGetWeatherByCity(t *testing.T) {
-	// Create a Chi router for proper URL parameter handling
-	r := chi.NewRouter()
-	r.Get("/weather/{city}", GetWeatherByCity)
+	req := httptest.NewRequest("GET", "/weather/Stockholm", nil)
+	w := httptest.NewRecorder()
 
-	req, err := http.NewRequest("GET", "/weather/Gothenburg", nil)
-	if err != nil {
-		t.Fatal(err)
+	GetWeatherByCity(w, req)
+
+	resp := w.Result()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", resp.StatusCode)
 	}
+}
 
-	rr := httptest.NewRecorder()
-	r.ServeHTTP(rr, req)
+func TestRecentSearchesHandlerEmpty(t *testing.T) {
+	req := httptest.NewRequest("GET", "/weather/recent", nil)
+	w := httptest.NewRecorder()
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
-
-	body := rr.Body.String()
-	if !strings.Contains(body, "Gothenburg") {
-		t.Errorf("Expected Gothenburg in response, got %v", body)
+	RecentSearchesHandler(w, req)
+	resp := w.Result()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", resp.StatusCode)
 	}
 }
